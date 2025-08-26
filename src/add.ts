@@ -1,18 +1,16 @@
-import * as dex from './dex';
+import { dexAxios, updateTxHash } from './dex';
+import type { AddRequest, AddResponse } from './interface';
 import { signTx } from './provider';
 import { termLinkBf } from './utils';
 
-const response = await dex.add({
-  tokenA: 'ADA',
-  amountA: 1,
-  tokenB: 'GET',
-  amountB: 100,
-});
-const { cbor, transactionId: txId } = response.data.data;
-console.log('Admin signed, cbor received');
+export async function add(args: AddRequest) {
+  const response = await dexAxios.post<AddResponse>('liquidity/add', args);
+  const { cbor, transactionId: txId } = response.data.data;
+  console.log('Admin signed, cbor received');
 
-const txHash = await signTx(cbor);
-console.log('User signed');
+  const txHash = await signTx(cbor);
+  console.log('User signed');
 
-await dex.updateTxHash(txHash, txId);
-console.log(`txId ${txId} updated with hash ${termLinkBf(txHash)}`);
+  await updateTxHash(txHash, txId);
+  console.log(`txId ${txId} updated with hash ${termLinkBf(txHash)}`);
+}

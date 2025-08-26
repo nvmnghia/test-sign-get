@@ -1,16 +1,22 @@
-import * as dex from './dex';
+import { dexAxios, updateTxHash } from './dex';
+import type { RemoveRequest, RemoveResponse } from './interface';
 import { signTx } from './provider';
 import { termLinkBf } from './utils';
 
-const response = await dex.remove({ poolId: 1, amount: 10_000 });
-const {
-  commonData: { cbor },
-  txId,
-} = response.data.data;
-console.log('Admin signed, cbor received');
+export async function remove(args: RemoveRequest) {
+  const response = await dexAxios.post<RemoveResponse>(
+    'liquidity/remove',
+    args,
+  );
+  const {
+    commonData: { cbor },
+    txId,
+  } = response.data.data;
+  console.log('Admin signed, cbor received');
 
-const txHash = await signTx(cbor);
-console.log('User signed');
+  const txHash = await signTx(cbor);
+  console.log('User signed');
 
-await dex.updateTxHash(txHash, txId);
-console.log(`txId ${txId} updated with hash ${termLinkBf(txHash)}`);
+  await updateTxHash(txHash, txId);
+  console.log(`txId ${txId} updated with hash ${termLinkBf(txHash)}`);
+}

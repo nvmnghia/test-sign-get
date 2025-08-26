@@ -1,21 +1,26 @@
-import * as dex from './dex';
+import { dexAxios, updateTxHash } from './dex';
+import type { SwapRequest, SwapResponse } from './interface';
 import { signTx } from './provider';
 import { termLinkBf } from './utils';
 
-const response = await dex.swap({
-  tokenA: 'ADA',
-  amountIn: 1,
-  tokenB: 'GET',
-  poolId: 1,
-});
-const {
-  additionalInfo: { rawTransaction: cbor },
-  transactionId: txId,
-} = response.data.data;
-console.log('Admin signed, rawTransaction received');
+export async function swap(args: SwapRequest) {
+  const { tokenA, tokenB } = args;
+  const isAdaGetSwap =
+    (tokenA === 'ADA' && tokenB === 'GET') ||
+    (tokenA === 'GET' && tokenB === 'ADA');
+  if (isAdaGetSwap && !args.poolId)
+    throw new Error('Pool ID is required for ADA-GET swap');
 
-const txHash = await signTx(cbor);
-console.log('User signed');
+  const response = await dexAxios.post<SwapResponse>('swap', args);
+  const {
+    additionalInfo: { rawTransaction: cbor },
+    transactionId: txId,
+  } = response.data.data;
+  console.log('Admin signed, rawTransaction received');
 
-await dex.updateTxHash(txHash, txId);
-console.log(`txId ${txId} updated with hash ${termLinkBf(txHash)}`);
+  const txHash = await signTx(cbor);
+  console.log('User signed');
+
+  await updateTxHash(txHash, txId);
+  console.log(`txId ${txId} updated with hash ${termLinkBf(txHash)}`);
+}
