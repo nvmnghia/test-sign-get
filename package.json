@@ -1,6 +1,7 @@
 {
   "name": "test-sign-get",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "author": "nvmnghia <nvmnghia@gmail.com>",
   "license": "MIT",
@@ -12,6 +13,7 @@
   "dependencies": {
     "@lucid-evolution/lucid": "^0.4.29",
     "@meshsdk/core": "^1.9.0-beta.72",
+    "axios": "^1.11.0",
     "dotenv": "^17.2.1"
   }
 }
