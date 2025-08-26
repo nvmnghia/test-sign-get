@@ -95,3 +95,25 @@ export async function add(request: TAddRequest) {
     ...request,
   });
 }
+
+export type TRemoveRequest = {
+  poolId: number;
+  amount: number;
+  useGETForFee?: boolean;
+  slippage?: number;
+};
+
+export type TRemoveResponse = {
+  data: {
+    txId: number;
+    commonData: { cbor: string };
+  };
+};
+
+export async function remove(request: TRemoveRequest) {
+  return await dexAxios.post<TRemoveResponse>('liquidity/remove', {
+    useGETForFee: true,
+    slippage: 0.5,
+    ...request,
+  });
+}
