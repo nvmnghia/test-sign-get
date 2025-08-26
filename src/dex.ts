@@ -117,3 +117,36 @@ export async function remove(request: TRemoveRequest) {
     ...request,
   });
 }
+
+export type TSwapRequest = {
+  poolId?: number;
+  tokenA: string;
+  amountIn: number;
+  tokenB: string;
+  useGETForFee?: boolean;
+  slippage?: number;
+};
+
+export type TSwapResponse = {
+  data: {
+    transactionId: number;
+    additionalInfo: {
+      rawTransaction: string;
+    };
+  };
+};
+
+export async function swap(request: TSwapRequest) {
+  const { tokenA, tokenB } = request;
+  const isAdaGetSwap =
+    (tokenA === 'ADA' && tokenB === 'GET') ||
+    (tokenA === 'GET' && tokenB === 'ADA');
+  if (isAdaGetSwap && !request.poolId)
+    throw new Error('Pool ID is required for ADA-GET swap');
+
+  return await dexAxios.post<TSwapResponse>('swap', {
+    useGETForFee: true,
+    slippage: 0.5,
+    ...request,
+  });
+}
