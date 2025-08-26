@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const BLOCKFROST_PROJECT_ID = process.env.BLOCKFROST_PROJECT_ID;
-const BLOCKFROST_NETWORK = process.env.BLOCKFROST_NETWORK || 'preprod';
+export const BLOCKFROST_NETWORK = process.env.BLOCKFROST_NETWORK || 'preprod';
 const WALLET_MNEMONIC = process.env.WALLET_MNEMONIC;
 const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY;
 
@@ -27,3 +27,12 @@ export const wallet = new MeshWallet({
   submitter: blockfrostProvider,
   key: walletConfig,
 });
+
+/**
+ * Given a CBOR, sign it and submit it to the network.
+ * Return the txHash.
+ */
+export async function signTx(cbor: string) {
+  const signedTx = await wallet.signTx(cbor, true);
+  return await wallet.submitTx(signedTx);
+}

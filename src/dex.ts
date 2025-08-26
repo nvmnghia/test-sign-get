@@ -15,6 +15,10 @@ if (!DEX_API_KEY) throw new Error('DEX_API_KEY is not set');
 const DEX_API_SECRET = process.env.DEX_API_SECRET!;
 if (!DEX_API_SECRET) throw new Error('DEX_API_SECRET is not set');
 
+/* -------------------------------------------------------------------------- */
+/*                                 Base Axios                                 */
+/* -------------------------------------------------------------------------- */
+
 export const dexAxios = axios.create({
   baseURL: DEX_API_URL,
   headers: {
@@ -33,7 +37,6 @@ function sign(config: InternalAxiosRequestConfig) {
   const method = config.method?.toUpperCase();
 
   const url = new URL(config.url ?? '', config.baseURL).toString();
-  console.log(config.url, config.baseURL);
 
   const payloadHash = createHash('sha512')
     .update(JSON.stringify(config.data ?? ''))
@@ -42,7 +45,6 @@ function sign(config: InternalAxiosRequestConfig) {
   const timestamp = Date.now().toString();
 
   const message = [method, url, payloadHash, timestamp].join('\n');
-  console.log(message);
   const signature = createHmac('sha256', DEX_API_SECRET)
     .update(message)
     .digest('hex');
@@ -51,4 +53,45 @@ function sign(config: InternalAxiosRequestConfig) {
   config.headers['X-API-Timestamp'] = timestamp;
 
   return config;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                    APIs                                    */
+/* -------------------------------------------------------------------------- */
+
+export async function updateTxHash(txHash: string, txId: number) {
+  return await dexAxios.put('transaction/update-tx-hash', {
+    txHash,
+    txId,
+  });
+}
+
+export type TAddRequest = {
+  tokenA: string;
+  tokenB: string;
+  amountA: number;
+  amountB: number;
+  useGETForFee?: boolean;
+  slippage?: number;
+};
+
+export type TAddResponse = {
+  data: {
+    cbor: string;
+    transactionId: number;
+  };
+};
+
+export async function add(request: TAddRequest) {
+  // FIXME: remove this
+  const tokenAId = request.tokenA === 'GET' ? 1 : 2;
+  const tokenBId = request.tokenB === 'GET' ? 1 : 2;
+
+  return await dexAxios.post<TAddResponse>('liquidity/add', {
+    useGETForFee: true,
+    slippage: 0.5,
+    tokenAId,
+    tokenBId,
+    ...request,
+  });
 }
