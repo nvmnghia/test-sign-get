@@ -45,3 +45,16 @@ export type SwapResponse = {
     };
   };
 };
+
+export type SwapUsdtToGetResponse = {
+  data: {
+    txId: number;
+    cardanoAddress: string;
+    usdtAmount: number; // * 10^decimal already
+    getAmount: number; // This one too
+    feeETH: string; // In wei
+    deadline: string; // Epoch timestamp in second
+    signature: string;
+    messageHash: string;
+  };
+};

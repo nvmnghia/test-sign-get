@@ -1,7 +1,7 @@
 import { dexAxios, updateTxHash } from './dex';
 import type { RemoveRequest, RemoveResponse } from './interface';
 import { signTx } from './provider';
-import { termLinkBf } from './utils';
+import { termLinkCardano } from './utils';
 
 export async function remove(args: RemoveRequest) {
   const response = await dexAxios.post<RemoveResponse>(
@@ -18,5 +18,5 @@ export async function remove(args: RemoveRequest) {
   console.log('User signed');
 
   await updateTxHash(txHash, txId);
-  console.log(`txId ${txId} updated with hash ${termLinkBf(txHash)}`);
+  console.log(`txId ${txId} updated with hash ${termLinkCardano(txHash)}`);
 }

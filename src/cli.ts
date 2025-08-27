@@ -8,7 +8,7 @@ import * as dex from './dex';
 import { signTx } from './provider';
 import { remove } from './remove';
 import { swap } from './swap';
-import { termLinkBf } from './utils';
+import { termLinkCardano } from './utils';
 
 yargs(hideBin(process.argv))
   .command(
@@ -46,7 +46,7 @@ yargs(hideBin(process.argv))
     },
   )
   .command(
-    'swap <tokenA> <amountIn> <tokenB> <poolId>',
+    'swap <tokenA> <amountIn> <tokenB> [poolId]',
     'Swap tokens',
     setupSwap,
     async (argv) => {
@@ -84,7 +84,9 @@ yargs(hideBin(process.argv))
         console.log('User signed');
 
         await dex.updateTxHash(txHash, txId);
-        console.log(`txId ${txId} updated with hash ${termLinkBf(txHash)}`);
+        console.log(
+          `txId ${txId} updated with hash ${termLinkCardano(txHash)}`,
+        );
       } catch (error) {
         console.error('Error:', error);
         process.exit(1);
@@ -172,7 +174,7 @@ function setupSwap(yargs: yargs.Argv) {
     .positional('poolId', {
       describe: 'Pool ID',
       type: 'number',
-      demandOption: true,
+      demandOption: false,
     })
     .option('fee', {
       describe: 'Fee token',
